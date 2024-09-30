@@ -52,5 +52,3 @@ Feel free to fork this repository, create a new branch, and submit a pull reques
 ## Contact
 If you have any questions or suggestions, please contact me at:
 - **Email**: joelgemini17@gmail.com
-
-```
