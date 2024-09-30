@@ -121,7 +121,7 @@ class Bill_App:
 
         self.total_price.set(f"Rs. {total_price}")
         self.total_tax.set(f"Rs. {total_tax}")
-        grand_total = total_price + total_tax
+        grand_total = total_price + total_tax 
 
         self.txtarea.insert(END, "\n-----------------------------------")
         self.txtarea.insert(END, f"\nTotal Bill : Rs. {grand_total}")
