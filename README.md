@@ -15,7 +15,7 @@ A Python-based billing application built using Tkinter for the GUI and FPDF for 
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/BILLING-SYSTEM.git
+   (https://github.com/joelgeorgegemini/BILLING-SYSTEM.git)
    ```
 
 2. **Install Dependencies**:
