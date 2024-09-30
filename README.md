@@ -34,7 +34,7 @@ A Python-based billing application built using Tkinter for the GUI and FPDF for 
 
 - Python 3.x
 - Tkinter (usually comes pre-installed with Python)
-- FPDF (`pip install fpdf`)
+- FPDF (`pip install fpdf`).
 
 ## How It Works
 
