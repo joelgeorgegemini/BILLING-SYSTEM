@@ -16,7 +16,7 @@ class Bill_App:
         # Variables
         # Product Variables with quantity and price
         self.products = {
-            "Nutella Choco Spread (Rs 250)": {"qty": IntVar(), "price": 250},
+            "Nutella (Rs 250)": {"qty": IntVar(), "price": 250},
             "Noodles (Rs 20)": {"qty": IntVar(), "price": 20},
             "Lays (Rs 10)": {"qty": IntVar(), "price": 10},
             "Oreo (Rs 20)": {"qty": IntVar(), "price": 20},
@@ -73,15 +73,16 @@ class Bill_App:
         Label(billing_menu, text="Total Price", font=("Arial Black", 14), bg="#A569BD", fg="white").grid(row=0, column=0, padx=20, pady=1, sticky="w")
         Entry(billing_menu, borderwidth=2, width=18, textvariable=self.total_price).grid(row=0, column=1, padx=10, pady=7)
 
-        Label(billing_menu, text="Total Tax", font=("Arial Black", 14), bg="#A569BD", fg="white").grid(row=1, column=0, padx=20, pady=1, sticky="w")
+        Label(billing_menu, text="Total Tax (5%)", font=("Arial Black", 14), bg="#A569BD", fg="white").grid(row=1, column=0, padx=20, pady=1, sticky="w")
         Entry(billing_menu, borderwidth=2, width=18, textvariable=self.total_tax).grid(row=1, column=1, padx=10, pady=7)
 
         button_frame = Frame(billing_menu, bd=7, relief=GROOVE, bg="#6C3483")
         button_frame.place(x=830, width=500, height=95)
 
         button_total = Button(button_frame, text="Total Bill", font=("Arial Black", 15), pady=10, bg="#E5B4F3", fg="#6C3483", command=self.total).grid(row=0, column=0, padx=12)
-        button_clear = Button(button_frame, text="Clear Field", font=("Arial Black", 15), pady=10, bg="#E5B4F3", fg="#6C3483", command=self.clear).grid(row=0, column=1, padx=10, pady=6)
-        button_exit = Button(button_frame, text="Exit", font=("Arial Black", 15), pady=10, bg="#E5B4F3", fg="#6C3483", width=8, command=self.exit_app).grid(row=0, column=2, padx=10, pady=6)
+        button_pdf = Button(button_frame, text="Download PDF", font=("Arial Black", 15), pady=10, bg="#E5B4F3", fg="#6C3483", command=self.download_pdf).grid(row=0, column=1, padx=10)
+        button_clear = Button(button_frame, text="Clear Field", font=("Arial Black", 15), pady=10, bg="#E5B4F3", fg="#6C3483", command=self.clear).grid(row=0, column=2, padx=10, pady=6)
+        button_exit = Button(button_frame, text="Exit", font=("Arial Black", 15), pady=10, bg="#E5B4F3", fg="#6C3483", width=8, command=self.exit_app).grid(row=0, column=3, padx=10, pady=6)
 
         self.intro()
 
@@ -99,73 +100,106 @@ class Bill_App:
         total_tax = 0
 
         self.txtarea.delete(1.0, END)
-        self.txtarea.insert(END, "\tWelcome to AIT Retail\n")
-        self.txtarea.insert(END, f"\nBill Number: {self.bill_no.get()}")
-        self.txtarea.insert(END, f"\nCustomer Name: {self.c_name.get()}")
-        self.txtarea.insert(END, f"\nPhone Number: {self.phone.get()}")
-        self.txtarea.insert(END, "\n===================================")
-        self.txtarea.insert(END, "\nProducts\t\tQty\tPrice")
-        self.txtarea.insert(END, "\n===================================")
 
-        # Calculate total for each product
+        # Adding a catchy header design
+        self.txtarea.insert(END, "\n***********************************\n")
+        self.txtarea.insert(END, "\t  *** AIT Retail ***\n")
+        self.txtarea.insert(END, "***********************************\n")
+
+        # Adding customer and bill details with some spacing
+        self.txtarea.insert(END, f"\n Bill No:   {self.bill_no.get()}")
+        self.txtarea.insert(END, f"\n Customer:  {self.c_name.get()}")
+        self.txtarea.insert(END, f"\n Phone No:  {self.phone.get()}")
+        self.txtarea.insert(END, "\n---------------------------------------------")
+
+        # Centered table headers for a cleaner look
+        self.txtarea.insert(END, "\n{:<25}{:<10}{:<10}".format("Products", "Qty", "Price"))
+        self.txtarea.insert(END, "\n---------------------------------------------")
+
+        # Calculate total for each product and display the product details in a cleaner format
         for product, vars in self.products.items():
             qty = vars["qty"].get()
             price = vars["price"]
             if qty > 0:
                 product_total = qty * price
-                self.txtarea.insert(END, f"\n{product}\t\t{qty}\t{product_total}")
+                # Product information with better alignment
+                self.txtarea.insert(END, "\n{:<25}{:<10}{:<10}".format(product, qty, product_total))
                 total_price += product_total
 
-        tax = total_price * 0.05  # Assuming 5% tax on total
+        # Calculate tax (assuming 5% tax rate) and display the totals
+        tax = total_price * 0.05
         total_tax += tax
 
         self.total_price.set(f"Rs. {total_price}")
         self.total_tax.set(f"Rs. {total_tax}")
-        grand_total = total_price + total_tax 
+        grand_total = total_price + total_tax
 
-        self.txtarea.insert(END, "\n-----------------------------------")
-        self.txtarea.insert(END, f"\nTotal Bill : Rs. {grand_total}")
-        self.txtarea.insert(END, "\n-----------------------------------")
-        self.save_bill(grand_total)
+        # Design for the total amount section with more spacing and separation
+        self.txtarea.insert(END, "\n---------------------------------------------")
+        self.txtarea.insert(END, f"\nTotal Price:\t\t   Rs. {total_price}")
+        self.txtarea.insert(END, f"\nTotal Tax:\t\t   Rs. {total_tax}")
+        self.txtarea.insert(END, f"\nGrand Total:\t\t   Rs. {grand_total}")
+        self.txtarea.insert(END, "\n---------------------------------------------")
 
-    def save_bill(self, grand_total):
-        option = messagebox.askyesno("Save Bill", "Do you want to save the Bill as a PDF?")
-        if option > 0:
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font("Arial", size=12)
-            bill_data = self.txtarea.get(1.0, END)
-            pdf.multi_cell(0, 10, bill_data)
-            pdf.output(f"Bill_{self.bill_no.get()}.pdf")
-            messagebox.showinfo("Saved", f"Bill No. {self.bill_no.get()} saved successfully as PDF.")
-        else:
-            return
+    def download_pdf(self):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", "B", 16)
 
-    def clear(self):
-        self.txtarea.delete(1.0, END)
-        self.c_name.set("")
-        self.phone.set("")
-        self.total_price.set("")
-        self.total_tax.set("")
-        for vars in self.products.values():
-            vars["qty"].set(0)
+        pdf.cell(200, 10, txt="AIT Retail - Customer Bill", ln=True, align="C")
+        pdf.ln(10)
+        pdf.set_font("Arial", size=12)
 
-    def exit_app(self):
-        option = messagebox.askyesno("Exit", "Do you really want to exit?")
-        if option > 0:
-            self.root.destroy()
+        # Adding customer details
+        pdf.cell(200, 10, txt=f"Bill No: {self.bill_no.get()}", ln=True)
+        pdf.cell(200, 10, txt=f"Customer: {self.c_name.get()}", ln=True)
+        pdf.cell(200, 10, txt=f"Phone No: {self.phone.get()}", ln=True)
+        pdf.ln(10)
+
+        # Adding the table headers
+        pdf.cell(60, 10, txt="Product", border=1)
+        pdf.cell(40, 10, txt="Quantity", border=1)
+        pdf.cell(40, 10, txt="Price", border=1)
+        pdf.ln()
+
+        # Adding the product details to the PDF
+        for product, vars in self.products.items():
+            qty = vars["qty"].get()
+            price = vars["price"]
+            if qty > 0:
+                product_total = qty * price
+                pdf.cell(60, 10, txt=product, border=1)
+                pdf.cell(40, 10, txt=str(qty), border=1)
+                pdf.cell(40, 10, txt=str(product_total), border=1)
+                pdf.ln()
+
+        # Adding totals
+        pdf.ln(10)
+        pdf.cell(200, 10, txt=f"Total Price: Rs. {self.total_price.get()}", ln=True)
+        pdf.cell(200, 10, txt=f"Total Tax: Rs. {self.total_tax.get()}", ln=True)
+        pdf.cell(200, 10, txt=f"Grand Total: Rs. {float(self.total_price.get()[4:]) + float(self.total_tax.get()[4:])}", ln=True)
+
+        # Save PDF
+        pdf.output("Customer_Bill.pdf")
+        messagebox.showinfo("PDF Saved", "Bill has been saved as PDF!")
 
     def intro(self):
         self.txtarea.delete(1.0, END)
-        self.txtarea.insert(END, "\tWelcome to AIT Retail\n")
-        self.txtarea.insert(END, "\nBill Number:")
-        self.txtarea.insert(END, f"\n{self.bill_no.get()}")
-        self.txtarea.insert(END, "\n===================================")
-        self.txtarea.insert(END, "\nProducts\t\tQty\tPrice")
-        self.txtarea.insert(END, "\n===================================")
+        self.txtarea.insert(END, "\nWelcome to AIT Retail\n")
+        self.txtarea.insert(END, "***********************************\n")
+        self.txtarea.insert(END, "\nCustomer Bill Area\n")
+        self.txtarea.insert(END, "***********************************\n")
 
+    def clear(self):
+        self.txtarea.delete(1.0, END)
+        self.intro()
 
-# Run the application
+    def exit_app(self):
+        response = messagebox.askyesno("Exit", "Do you want to exit?")
+        if response > 0:
+            self.root.destroy()
+
+# Running the application
 root = Tk()
 obj = Bill_App(root)
 root.mainloop()
